@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>The Criminal Times — Crimen Organizado Chile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;600&display=swap"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --ink:#08060400;--paper:#100e0b;--cream:#171410;
+  --gold:#c9a84c;--gold-dim:#6b5a2a;--red:#8b1a1a;--red-bright:#c0392b;
+  --text:#cfc4aa;--text-dim:#6a6050;--border:#28241a;--accent:#e8d5a0;--white:#f0e8d0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#100e0b;color:var(--text);font-family:'Crimson Text',Georgia,serif;font-size:17px;line-height:1.65}
+
+#upload-banner { background: #171410; border-bottom: 2px solid var(--red); padding: 10px 20px; text-align: center; }
+#upload-banner .status-badge { font-family: 'Source Code Pro', monospace; font-size: 11px; color: var(--gold); letter-spacing: 1px; border: 1px dashed var(--gold-dim); padding: 5px 10px; border-radius: 3px; }
+
+.masthead{border-bottom:3px double var(--gold);text-align:center;padding:20px 20px 14px; background:linear-gradient(180deg,#060402 0%,#100e0b 100%)}
+.masthead-rule{border:none;border-top:1px solid var(--gold-dim);margin:10px 0}
+.masthead-top{display:flex;align-items:center;justify-content:space-between;max-width:1440px;margin:0 auto;gap:12px}
+.masthead-side{font-family:'Source Code Pro',monospace;font-size:10px;color:var(--text-dim);line-height:2;min-width:150px}
+.masthead-side b{color:var(--gold);display:block;font-size:11px}
+.masthead-title{font-family:'UnifrakturMaguntia',cursive;font-size:clamp(38px,6.5vw,100px); color:var(--white);letter-spacing:1px;text-shadow:0 0 60px rgba(201,168,76,.25),3px 3px 0 rgba(0,0,0,.9);line-height:1}
+.masthead-sub{font-family:'Playfair Display',serif;font-style:italic;color:var(--gold); font-size:12px;letter-spacing:5px;text-transform:uppercase;margin-top:3px}
+
+.nav-bar{display:flex;justify-content:center;background:#130f0b;border-bottom:1px solid var(--border);overflow-x:auto}
+.nav-bar a{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:2.5px;text-transform:uppercase; color:var(--text-dim);padding:10px 18px;text-decoration:none;border-right:1px solid var(--border); white-space:nowrap;transition:.2s}
+.nav-bar a:hover{color:var(--gold);background:rgba(201,168,76,.05)}
+
+.container{max-width:1440px;margin:0 auto;padding:0 24px}
+section{padding:44px 0;border-bottom:1px solid var(--border)}
+.s-label{font-family:'Source Code Pro',monospace;font-size:10px;color:var(--red-bright); letter-spacing:3px;text-transform:uppercase;margin-bottom:5px}
+.s-head{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.s-head h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:700; color:var(--accent);letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.s-head::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--gold-dim),transparent)}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border)}
+.stat-box{background:#171410;padding:22px 18px;text-align:center;position:relative}
+.stat-box::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold-dim)}
+.stat-n{font-family:'Playfair Display',serif;font-size:46px;font-weight:900;color:var(--gold);line-height:1}
+.stat-l{font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:2px; text-transform:uppercase;color:var(--text-dim);margin-top:5px}
+
+.front-grid{display:grid;grid-template-columns:2fr 1px 1fr 1px 1fr;gap:0}
+.col-div{background:var(--border)}
+.front-main{padding-right:28px}
+.f-headline{font-family:'Playfair Display',serif;font-size:clamp(20px,2.8vw,36px);font-weight:900; line-height:1.15;color:var(--white);margin-bottom:10px;border-bottom:2px solid var(--red);padding-bottom:10px}
+.f-byline{font-family:'Source Code Pro',monospace;font-size:10px;color:var(--text-dim);margin-bottom:14px}
+.f-body{font-size:15.5px;line-height:1.75;color:var(--text);columns:2;column-gap:22px}
+.front-side{padding:0 26px}
+.side-story{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+.s-title{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:700; color:var(--accent);line-height:1.3;margin:5px 0 3px}
+.s-title a{color:inherit;text-decoration:none;transition:.15s}
+.s-title a:hover{color:var(--gold)}
+.s-meta{font-family:'Source Code Pro',monospace;font-size:9px;color:var(--text-dim)}
+
+/* Tags de Delitos */
+.tag{font-family:'Source Code Pro',monospace;font-size:9px;letter-spacing:1.5px; padding:2px 7px;border-radius:2px;display:inline-block;font-weight:600;text-transform:uppercase}
+.tag-trafico_drogas{background:#0d3b1e;color:#4ade80;border:1px solid #166534}
+.tag-microtráfico{background:#052e1a;color:#34d399;border:1px solid #064e27}
+.tag-secuestro{background:#3b0a0a;color:#fca5a5;border:1px solid #7f1d1d}
+.tag-homicidio{background:#1a0000;color:#ff4444;border:1px solid #cc0000}
+.tag-robo_violento{background:#1e1500;color:#fbbf24;border:1px solid #78350f}
+.tag-robo_vehiculos{background:#0f1e00;color:#a3e635;border:1px solid #365314}
+.tag-asociacion_ilicita{background:#001e2e;color:#38bdf8;border:1px solid #0c4a6e}
+.tag-lavado_activos{background:#001e1a;color:#2dd4bf;border:1px solid #115e59}
+.tag-otro{background:#1a1a1a;color:#888;border:1px solid #333}
+
+/* Mapa Controles */
+.map-filters { display: flex; gap: 20px; padding: 16px; background: #171410; border: 1px solid var(--border); margin-bottom: 15px; border-radius: 2px; flex-wrap: wrap; }
+.map-filters label { font-family: 'Source Code Pro', monospace; font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 8px;}
+#map-year-slider { width: 100%; cursor: pointer; accent-color: var(--red); }
+#map{height:540px;border:1px solid var(--border);border-radius:2px}
+.map-legend{display:flex;flex-wrap:wrap;gap:0;border:1px solid var(--border);background:#171410; margin-top:14px;}
+.legend-item{display:flex;align-items:center;gap:8px;padding:8px 14px; font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:1px; color:var(--text-dim);cursor:pointer;border-right:1px solid var(--border); transition:all .2s;user-select:none}
+.legend-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+.legend-item.active{color:var(--white);background:rgba(255,255,255,.05)}
+.legend-item.dimmed{opacity:.18}
+.legend-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+
+.charts-container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }
+.chart-wrap{position:relative;height:300px; flex: 1;}
+.chart-card{background:#171410;border:1px solid var(--border);padding:20px; display: flex; flex-direction: column;}
+.chart-card h3{font-family:'Playfair Display',serif;font-size:13px;color:var(--accent); margin-bottom:14px;text-transform:uppercase;letter-spacing:1.5px}
+
+.org-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.org-card{background:#171410;border:1px solid var(--border);padding:14px 16px; position:relative;overflow:hidden;}
+.org-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--red)}
+.org-name{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:700; color:var(--accent);margin-bottom:4px;padding-left:4px}
+.org-count{font-family:'Source Code Pro',monospace;font-size:26px;font-weight:600; color:var(--gold);padding-left:4px}
+
+.split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+.scroll-panel { max-height: 400px; overflow-y: auto; padding-right: 10px; }
+.scroll-panel::-webkit-scrollbar { width: 6px; }
+.scroll-panel::-webkit-scrollbar-track { background: var(--paper); }
+.scroll-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.news-table{width:100%;border-collapse:collapse}
+.news-table thead tr{border-bottom:2px solid var(--gold-dim); position: sticky; top: 0; background: #130f0b; z-index: 10;}
+.news-table th{font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:2px; text-transform:uppercase;color:var(--gold);padding:8px 10px;text-align:left;font-weight:400}
+.news-table tbody tr{border-bottom:1px solid var(--border);transition:.12s}
+.news-table tbody tr:hover{background:rgba(201,168,76,.04)}
+.news-table td{padding:9px 10px;font-size:13.5px;vertical-align:top}
+.td-t a{color:var(--accent);text-decoration:none;font-family:'Playfair Display',serif;font-size:14.5px;}
+
+input,select{background:#0e0c09;border:1px solid var(--border);color:var(--text); padding:7px 11px;font-family:'Source Code Pro',monospace;font-size:11px;outline:none;}
+.btn-f{font-family:'Source Code Pro',monospace;font-size:10px;padding:8px 12px;background:#171410;border:1px solid var(--border); color:var(--text-dim);cursor:pointer;text-transform:uppercase;transition:.2s; font-weight: bold;}
+.btn-f:hover{background:var(--red);color:var(--white)}
+
+.ticker{background:var(--red);overflow:hidden;white-space:nowrap;padding:5px 0;border-bottom:1px solid #5a0000}
+.ticker-inner{display:inline-block;animation:tick 90s linear infinite; font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1px;color:#ffcccc}
+@keyframes tick{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .front-grid{grid-template-columns:1fr}.col-div{display:none}
+  .f-body{columns:1}
+  .split-grid { grid-template-columns: 1fr; }
+  .charts-container { grid-template-columns: 1fr; }
+}
+
+/* ── Analítica ── */
+.analitica-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.analitica-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; }
+.analitica-full { display: grid; grid-template-columns: 1fr; gap: 18px; }
+.a-card { background:#171410; border:1px solid var(--border); padding:22px; }
+.a-card h3 { font-family:'Playfair Display',serif; font-size:12px; color:var(--gold);
+  text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; }
+.a-card .a-subtitle { font-family:'Source Code Pro',monospace; font-size:9px;
+  color:var(--text-dim); letter-spacing:1px; margin-bottom:16px; }
+.a-chart-wrap { position:relative; }
+.pill-row { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+.pill { font-family:'Source Code Pro',monospace; font-size:9px; padding:4px 10px;
+  border-radius:12px; letter-spacing:1px; display:flex; align-items:center; gap:6px; }
+.pill-bar-wrap { margin-top:10px; }
+.pill-bar-item { display:flex; align-items:center; gap:10px; margin-bottom:7px; font-size:12px; }
+.pill-bar-label { font-family:'Source Code Pro',monospace; font-size:9px; color:var(--text-dim);
+  min-width:130px; letter-spacing:.5px; }
+.pill-bar-track { flex:1; background:var(--border); height:8px; border-radius:2px; overflow:hidden; }
+.pill-bar-fill { height:100%; border-radius:2px; transition:width .6s ease; }
+.pill-bar-val { font-family:'Source Code Pro',monospace; font-size:9px; color:var(--text-dim);
+  min-width:30px; text-align:right; }
+.dual-stat { display:flex; gap:14px; margin-top:12px; }
+.dual-stat-box { flex:1; background:var(--paper); border:1px solid var(--border);
+  padding:14px; text-align:center; }
+.dual-stat-n { font-family:'Playfair Display',serif; font-size:32px; color:var(--gold); font-weight:900; }
+.dual-stat-l { font-family:'Source Code Pro',monospace; font-size:9px; color:var(--text-dim);
+  text-transform:uppercase; letter-spacing:1.5px; margin-top:3px; }
+@media(max-width:900px){
+  .analitica-grid, .analitica-grid-3 { grid-template-columns:1fr; }
+}
+
+.yr-btn {
+  font-family:'Source Code Pro',monospace; font-size:10px; letter-spacing:2px;
+  padding:10px 16px; background:transparent; border:none;
+  border-right:1px solid var(--border); color:var(--text-dim);
+  cursor:pointer; transition:.15s; white-space:nowrap; text-transform:uppercase;
+}
+.yr-btn:hover { background:rgba(201,168,76,.07); color:var(--gold); }
+.yr-btn.yr-active {
+  background:var(--red); color:#fff; font-weight:600;
+}
+</style>
+</head>
+<body>
+
+<div id="upload-banner">
+  <span class="status-badge">🗂️ BASE DE DATOS EN LÍNEA</span>
+  <span id="upload-status" style="margin-left:15px; font-family:monospace; font-size:11px; color:#c9a84c;">Conectando...</span>
+</div>
+
+<div class="ticker"><span class="ticker-inner" id="ticker-text">Cargando datos...</span></div>
+
+<header class="masthead">
+  <div class="masthead-top">
+    <div class="masthead-side">
+      <b id="hdr-date"></b>Edición Digital · Base Dinámica
+      <b>Crimen Organizado Chile</b>2019 — 2026
+    </div>
+    <div>
+      <div class="masthead-title">The Criminal Times</div>
+      <div class="masthead-sub">Intelligence Report — Base de Datos Enriquecida</div>
+    </div>
+    <div class="masthead-side" style="text-align:right">
+      <b id="hdr-total">0</b>Hechos documentados
+      <b id="hdr-comunas">0 comunas</b>Analizadas
+    </div>
+  </div>
+  <hr class="masthead-rule"/>
+</header>
+
+<nav class="nav-bar">
+  <a href="#portada">Portada</a>
+  <a href="#mapa">Mapa y Evolución</a>
+  <a href="#estadisticas">Estadísticas</a>
+  <a href="#analitica">Analítica</a>
+  <a href="#organizaciones">Bandas</a>
+  <a href="#personas">Ficha Judicial</a>
+  <a href="#noticias">Archivo General</a>
+</nav>
+
+<div style="border-bottom:1px solid var(--border)">
+  <div class="container"><div class="stats-grid" id="stats-grid"></div></div>
+</div>
+
+<section id="portada">
+  <div class="container">
+    <div class="s-label">Portada</div>
+    <div class="s-head"><h2>Últimas Noticias Registradas</h2></div>
+    <div class="front-grid">
+      <div class="front-main" id="front-main"></div>
+      <div class="col-div"></div>
+      <div class="front-side" id="front-col2"></div>
+      <div class="col-div"></div>
+      <div class="front-side" id="front-col3"></div>
+    </div>
+  </div>
+</section>
+
+<section id="mapa" style="background:#130f0b">
+  <div class="container">
+    <div class="s-label">Análisis Territorial y Evolución</div>
+    <div class="s-head"><h2>Mapa de Incidentes</h2></div>
+    
+    <div class="map-filters">
+        <div style="flex: 1; min-width: 250px;">
+            <label>Evolución Temporal (Deslizar por Año): <span id="map-year-display" style="color:var(--white); font-weight:bold; font-size:14px; margin-left:10px;">TODOS</span></label>
+            <input type="range" id="map-year-slider" min="0" max="0" value="0">
+        </div>
+    </div>
+
+    <div id="map"></div>
+    <div class="map-legend" id="map-legend"></div>
+  </div>
+</section>
+
+<section id="estadisticas">
+  <div class="container">
+    <div class="s-label">Análisis de Datos</div>
+    
+    <div class="charts-container">
+        <div>
+            <div class="s-head" style="justify-content: space-between; flex-wrap: wrap; margin-bottom: 15px;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                    <h2 style="margin: 0;">Distribución Temporal y Tipológica</h2>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <label style="font-family:'Source Code Pro', monospace; font-size:10px; color:var(--gold); text-transform:uppercase;">Evolución por Delito:</label>
+                    <select id="timeline-delito-select" style="min-width: 200px;">
+                        <option value="ALL">Todos combinados</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-wrap"><canvas id="timelineChart"></canvas></div>
+        </div>
+        
+        <div class="chart-card">
+            <h3>Tipos de Delito Principales</h3>
+            <div style="flex:1; position:relative; min-height: 250px;"><canvas id="donutChart"></canvas></div>
+        </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="analitica" style="background:#130f0b">
+<div class="container">
+  <div class="s-head" style="flex-wrap:wrap; gap:12px;">
+    <div><p class="s-label">Analítica Profunda</p><h2>Inteligencia y Patrones del Crimen</h2></div>
+  </div>
+
+  <!-- SELECTOR DE AÑO -->
+  <div id="analitica-year-bar" style="
+    display:flex; align-items:center; gap:0;
+    background:#171410; border:1px solid var(--border);
+    margin-bottom:22px; overflow-x:auto; flex-wrap:wrap;">
+    <div style="
+      font-family:'Source Code Pro',monospace; font-size:9px; letter-spacing:2px;
+      color:var(--text-dim); text-transform:uppercase; padding:10px 16px;
+      border-right:1px solid var(--border); white-space:nowrap;">
+      Filtrar año
+    </div>
+    <!-- los botones se generan en JS -->
+  </div>
+  <div id="analitica-year-label" style="
+    font-family:'Source Code Pro',monospace; font-size:10px; color:var(--gold);
+    letter-spacing:2px; margin-bottom:18px; margin-top:-10px;">
+  </div>
+
+  <!-- FILA 1: Donut mercado + Barras sustancias -->
+  <div class="analitica-grid" style="margin-bottom:18px">
+
+    <div class="a-card">
+      <h3>Tipo de mercado ilícito</h3>
+      <div class="a-subtitle">DISTRIBUCIÓN POR CATEGORÍA DE ACTIVIDAD CRIMINAL</div>
+      <div class="a-chart-wrap" style="height:280px"><canvas id="chartMercado"></canvas></div>
+    </div>
+
+    <div class="a-card">
+      <h3>Sustancias y bienes incautados</h3>
+      <div class="a-subtitle">RANKING POR FRECUENCIA DE MENCIÓN EN NOTICIAS</div>
+      <div id="barSustancias" class="pill-bar-wrap" style="margin-top:6px"></div>
+    </div>
+
+  </div>
+
+  <!-- FILA 2: Nacionalidades imputados + víctimas -->
+  <div class="analitica-grid" style="margin-bottom:18px">
+
+    <div class="a-card">
+      <h3>Nacionalidad de imputados</h3>
+      <div class="a-subtitle">EXTRANJEROS VS NACIONALES EN CAUSAS CRIMINALES</div>
+      <div class="a-chart-wrap" style="height:270px"><canvas id="chartNacImp"></canvas></div>
+    </div>
+
+    <div class="a-card">
+      <h3>Nacionalidad de víctimas</h3>
+      <div class="a-subtitle">PERFIL NACIONAL DE LAS VÍCTIMAS REGISTRADAS</div>
+      <div class="a-chart-wrap" style="height:270px"><canvas id="chartNacVic"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- FILA 3: Línea armas/homicidio por año + barras modalidades -->
+  <div class="analitica-grid" style="margin-bottom:18px">
+
+    <div class="a-card">
+      <h3>Uso de armas y homicidios por año</h3>
+      <div class="a-subtitle">EVOLUCIÓN ANUAL 2019–2026 · CASOS REGISTRADOS</div>
+      <div class="a-chart-wrap" style="height:260px"><canvas id="chartArmasHom"></canvas></div>
+    </div>
+
+    <div class="a-card">
+      <h3>Modalidades delictuales</h3>
+      <div class="a-subtitle">TOP 10 FORMAS DE EJECUCIÓN DEL DELITO</div>
+      <div id="barModalidades" class="pill-bar-wrap" style="margin-top:6px"></div>
+    </div>
+
+  </div>
+
+  <!-- FILA 4: Menores por año (área) + etapa judicial (donut) + origen org (barras) -->
+  <div class="analitica-grid-3" style="margin-bottom:18px">
+
+    <div class="a-card">
+      <h3>Menores de edad involucrados</h3>
+      <div class="a-subtitle">PRESENCIA ANUAL EN CAUSAS CRIMINALES</div>
+      <div class="a-chart-wrap" style="height:220px"><canvas id="chartMenores"></canvas></div>
+    </div>
+
+    <div class="a-card">
+      <h3>Etapa judicial</h3>
+      <div class="a-subtitle">ESTADO PROCESAL DE LAS CAUSAS</div>
+      <div class="a-chart-wrap" style="height:220px"><canvas id="chartEtapa"></canvas></div>
+    </div>
+
+    <div class="a-card">
+      <h3>Origen de organizaciones</h3>
+      <div class="a-subtitle">PAÍS DE PROCEDENCIA DE BANDAS IDENTIFICADAS</div>
+      <div class="a-chart-wrap" style="height:220px"><canvas id="chartOrigenOrg"></canvas></div>
+    </div>
+
+  </div>
+
+  <!-- FILA 5: Nivel de violencia + indicadores globales -->
+  <div class="analitica-grid" style="margin-bottom:0">
+
+    <div class="a-card">
+      <h3>Nivel de violencia</h3>
+      <div class="a-subtitle">CLASIFICACIÓN POR INTENSIDAD EN CADA HECHO</div>
+      <div class="a-chart-wrap" style="height:240px"><canvas id="chartViolencia"></canvas></div>
+    </div>
+
+    <div class="a-card">
+      <h3>Indicadores generales</h3>
+      <div class="a-subtitle">MÉTRICAS CLAVE DEL DATASET COMPLETO</div>
+      <div class="dual-stat">
+        <div class="dual-stat-box">
+          <div class="dual-stat-n" id="kpi-armas">–</div>
+          <div class="dual-stat-l">Casos con<br>uso de armas</div>
+        </div>
+        <div class="dual-stat-box">
+          <div class="dual-stat-n" id="kpi-homicidio">–</div>
+          <div class="dual-stat-l">Casos con<br>homicidio</div>
+        </div>
+      </div>
+      <div class="dual-stat" style="margin-top:10px">
+        <div class="dual-stat-box">
+          <div class="dual-stat-n" id="kpi-menores">–</div>
+          <div class="dual-stat-l">Causas con<br>menores</div>
+        </div>
+        <div class="dual-stat-box">
+          <div class="dual-stat-n" id="kpi-extranjeros">–</div>
+          <div class="dual-stat-l">Imputados<br>extranjeros</div>
+        </div>
+      </div>
+      <div style="margin-top:14px; font-family:'Source Code Pro',monospace; font-size:9px;
+        color:var(--text-dim); border-top:1px solid var(--border); padding-top:12px;">
+        <div id="kpi-extra-lines"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</section>
+<section id="organizaciones" style="background:#130f0b">
+  <div class="container">
+    <div class="s-label">Inteligencia Criminal</div>
+    <div class="s-head"><h2>Organizaciones Identificadas</h2></div>
+    <div class="org-grid scroll-panel" id="org-grid" style="max-height: 380px; padding-bottom: 5px;"></div>
+  </div>
+</section>
+
+<section id="personas" style="background:#171410; border-top: 2px solid var(--border);">
+  <div class="container">
+    <div class="s-head" style="justify-content: space-between; flex-wrap: wrap;">
+        <div style="display:flex; align-items:center; gap:14px;">
+            <h2>Prontuario y Ficha Judicial</h2>
+        </div>
+        <button class="btn-f" onclick="descargarDatosPersonas()" style="background:var(--border); color:var(--gold);">⬇ Descargar Datos (JSON)</button>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center;">
+        <input id="personas-search" placeholder="Buscar nombre..." style="flex:1; min-width:200px;"
+               oninput="filtrarPersonas()"/>
+        <span id="personas-count" style="font-family:'Source Code Pro',monospace; font-size:10px; color:var(--text-dim); white-space:nowrap;"></span>
+    </div>
+    
+    <div class="split-grid">
+      <div>
+        <div class="s-label">Ficha Judicial</div>
+        <h3 style="color:var(--accent); margin-bottom: 15px; font-family:'Playfair Display',serif;">Imputados Formalizados / Detenidos</h3>
+        <div class="scroll-panel">
+          <table class="news-table" style="background: #130f0b;">
+            <thead>
+              <tr>
+                <th>Nombre del Imputado</th>
+                <th>Delitos Asociados (Historial)</th>
+              </tr>
+            </thead>
+            <tbody id="imputados-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="s-label">Prontuario</div>
+        <h3 style="color:var(--accent); margin-bottom: 15px; font-family:'Playfair Display',serif;">Delincuentes y Delitos Asociados</h3>
+        <div class="scroll-panel">
+          <table class="news-table" style="background: #130f0b;">
+            <thead>
+              <tr>
+                <th>Nombre del Delincuente</th>
+                <th>Delitos Asociados (Historial)</th>
+              </tr>
+            </thead>
+            <tbody id="delincuentes-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="noticias">
+  <div class="container">
+    <div class="s-label">Archivo Completo</div>
+    <div class="s-head"><h2>Base de Datos Principal</h2></div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <input id="search-input" placeholder="Buscar titular, comuna, organización..." style="flex:1;min-width:200px"/>
+      <select id="delito-filter"><option value="">Todos los delitos</option></select>
+      <span id="result-count" style="font-family:'Source Code Pro',monospace;font-size:10px;color:var(--text-dim); align-self:center;"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="news-table">
+        <thead><tr>
+          <th>Fecha</th><th>Titular</th><th>Delito</th>
+          <th>Comuna</th><th>Organización</th><th>Fuente</th>
+        </tr></thead>
+        <tbody id="news-tbody"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+      <button id="prev-page" class="btn-f">← Anterior</button>
+      <span id="page-info" style="font-family:'Source Code Pro',monospace;font-size:10px;color:var(--text-dim)"></span>
+      <button id="next-page" class="btn-f">Siguiente →</button>
+    </div>
+  </div>
+</section>
+
+<script>
+// VARIABLES GLOBALES PARA DATOS
+let RAW_DATA = [];
+let DATA = {
+  stats: { total: 0, homicidios: 0, crimen_organizado: 0, comunas: new Set() },
+  comunas: {},
+  timeline: {},
+  delitos: {},
+  organizaciones: {},
+  imputadosData: {},
+  delincuentes: {},
+  noticias: [],
+  anios: new Set()
+};
+
+// ESTILOS DE CATEGORÍAS
+const COLORES = {
+  'trafico_drogas': '#4ade80', 'microtráfico': '#34d399', 'secuestro': '#fca5a5', 'homicidio': '#ff4444',
+  'robo_violento': '#fbbf24', 'robo_vehiculos': '#a3e635', 'asociacion_ilicita': '#38bdf8',
+  'lavado_activos': '#2dd4bf', 'extorsion': '#fb923c', 'trafico_armas': '#facc15',
+  'trata_personas': '#e879f9', 'contrabando': '#94a3b8', 'otro': '#888'
+};
+const col = d => COLORES[d] || '#888';
+const lbl = d => (d||'otro').replace(/_/g, ' ').toUpperCase();
+const tagHtml = d => `<span class="tag tag-${d||'otro'}" style="background:${col(d)}20; color:${col(d)}; border: 1px solid ${col(d)}">${lbl(d)}</span>`;
+const fmtDate = iso => {
+    if(!iso) return '—';
+    const d = new Date(iso);
+    return isNaN(d) ? iso.substring(0,10) : d.toLocaleDateString('es-CL', {day:'2-digit', month:'short', year:'numeric'});
+};
+
+// GESTIÓN DE MAPA Y GRÁFICOS
+let map, markersLayer;
+let mapActiveFilters = new Set();
+let currentMapYear = "ALL";
+let timelineChartObj, donutChartObj;
+
+// INICIALIZACIÓN
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('hdr-date').textContent = new Date().toLocaleDateString('es-CL');
+    setupNewsPagination();
+    
+    // Configurar Mapa
+    map = L.map('map',{center:[-33.45,-70.65], zoom:5});
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+      attribution:'© OpenStreetMap © CARTO',subdomains:'abcd',maxZoom:19
+    }).addTo(map);
+    markersLayer = L.layerGroup().addTo(map);
+    
+    const st = document.createElement('style');
+    st.textContent = `.dp .leaflet-popup-content-wrapper{background:#1a1710;border:1px solid #2e2a20;color:#d4c9b0;box-shadow:0 4px 24px rgba(0,0,0,.95)}.dp .leaflet-popup-tip{background:#1a1710}.dp .leaflet-popup-close-button{color:#6a6050!important}`;
+    document.head.appendChild(st);
+
+    // Evento Filtro Timeline
+    document.getElementById('timeline-delito-select').addEventListener('change', renderTimelineChart);
+
+    // NUEVO: Ejecutar carga automática del JSON local al cargar la web
+    cargarJsonAutomatico();
+});
+
+// NUEVO: CARGA AUTOMÁTICA MEDIANTE FETCH
+function cargarJsonAutomatico() {
+    const statusEl = document.getElementById('upload-status');
+    statusEl.textContent = "Cargando base de datos (noticias_enriquecidas.json)...";
+    statusEl.style.color = "var(--gold)";
+
+    fetch('./noticias_enriquecidas.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('No se pudo encontrar el archivo "noticias_enriquecidas.json" en la misma carpeta.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            RAW_DATA = data;
+            processRawData();
+            statusEl.textContent = "Cargado exitosamente: noticias_enriquecidas.json (" + RAW_DATA.length + " incidentes)";
+            statusEl.style.color = "#4ade80";
+        })
+        .catch(err => {
+            statusEl.textContent = "Error al leer los datos automáticamente.";
+            statusEl.style.color = "var(--red-bright)";
+            console.error(err);
+        });
+}
+
+// ── FILTRO DE NOMBRES REALES ───────────────────────────────────────────────
+// Descarta entradas que claramente NO son nombres de personas:
+//   - Iniciales sueltas: A.E.V.A. / A.M.R. / J.V.
+//   - Edades o descriptores numéricos: "17 años", "35 años"
+//   - Apodos con artículo: "El Cachita", "La Gringa", "Los Patos"
+//   - Strings demasiado cortos (< 5 caracteres) o demasiado largos (> 60)
+//   - Solo dígitos / solo caracteres especiales
+//   - Frases genéricas: "desconocido", "imputado", "sujeto", "individuo", etc.
+//   - Todo en mayúsculas SIN espacios (probablemente código o sigla)
+
+const APODOS_ARTICULO = /^(el|la|los|las|don|doña|un|una)\s/i;
+const SOLO_INICIALES  = /^([A-ZÁÉÍÓÚÜÑ]\.){2,}([A-ZÁÉÍÓÚÜÑ]\.?)?$/i;
+const INICIALES_SIMPLES = /^[A-ZÁÉÍÓÚÜÑ]\.[A-ZÁÉÍÓÚÜÑ]\.?$/i;
+const CONTIENE_EDAD   = /\b\d{1,3}\s*(años?|meses?|year)/i;
+const SOLO_NUMEROS    = /^\d+$/;
+const MUY_CORTO       = s => s.length < 5;
+const MUY_LARGO       = s => s.length > 60;
+const FRASES_GENERICAS = /^(desconocido|desconocida|imputado|imputada|sujeto|sujeta|individuo|acusado|acusada|detenido|detenida|menor|víctima|testigo|funcionario|agente|inspector|detective|carabinero|pdi|policía|fiscal|juez|abogado|defensor|querellante|denunciante|apodado|alias|conocido como|null|n\/a|no\s+se\s+identifica|sin\s+nombre)s?$/i;
+const SIGLA_PURA      = /^[A-Z0-9]{2,8}$/; // BICRIM, PDI, etc.
+
+function esNombreReal(nombre) {
+    if (!nombre || typeof nombre !== 'string') return false;
+    const s = nombre.trim();
+    if (MUY_CORTO(s) || MUY_LARGO(s))         return false;
+    if (SOLO_NUMEROS.test(s))                   return false;
+    if (SOLO_INICIALES.test(s))                 return false;
+    if (INICIALES_SIMPLES.test(s))              return false;
+    if (CONTIENE_EDAD.test(s))                  return false;
+    if (APODOS_ARTICULO.test(s))                return false;
+    if (FRASES_GENERICAS.test(s))               return false;
+    if (SIGLA_PURA.test(s))                     return false;
+    // Filtrar patrón "A. J. F. C." — inicial mayúscula + punto con espacios
+    if (/^([A-ZÁÉÍÓÚÜÑ]\.\s*){2,}$/.test(s))  return false;
+    // Filtrar patrón "A. A. R. V." con espacios entre iniciales
+    if (/^([A-ZÁÉÍÓÚÜÑ]\.\s+){1,}[A-ZÁÉÍÓÚÜÑ]\.?$/.test(s)) return false;
+    // Toda la cadena son solo iniciales con puntos y espacios
+    if (/^([A-ZÁÉÍÓÚÜÑ][.]\s*)+$/.test(s))    return false;
+    // Debe contener al menos una letra
+    if (!/[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]/.test(s))     return false;
+    // Debe tener al menos dos "palabras" (nombre + apellido) o ser > 7 chars
+    const palabras = s.split(/\s+/).filter(p => p.length > 1);
+    if (palabras.length < 2 && s.length < 8)    return false;
+    return true;
+}
+
+// PROCESAMIENTO PRINCIPAL
+function processRawData() {
+    DATA = { stats: { total: 0, homicidios: 0, crimen_organizado: 0, comunas: new Set() },
+             comunas: {}, timeline: {}, delitos: {}, organizaciones: {},
+             imputadosData: {}, delincuentes: {}, noticias: [], anios: new Set(),
+             analitica: {
+                 nacImp:{}, nacVic:{}, sustancias:{}, mercado:{},
+                 etapa:{}, origenOrg:{}, modalidad:{}, violencia:{},
+                 armasPorAnio:{}, homPorAnio:{}, menoresPorAnio:{},
+                 totalArmas:0, totalSinArmas:0,
+                 totalHom:0, totalSinHom:0,
+                 totalMenoresSi:0, totalMenoresNo:0,
+                 totalExtranjeros:0
+             }
+           };
+
+    RAW_DATA.forEach(row => {
+        const comuna = row.analisis?.ubicacion?.comuna;
+        
+        // REGLA 1: Solo considera noticias que tienen comuna distinta de null
+        if (!comuna || comuna === 'null' || comuna.trim() === '') return;
+
+        // REGLA 2: Filtros de fecha
+        const fechaMes = row.fecha_publicacion ? row.fecha_publicacion.substring(0, 7) : null;
+        if (fechaMes === '2026-05') return;                     // mes incompleto
+        if (fechaMes && fechaMes < '2019-01') return;           // anteriores a 2019
+
+        DATA.stats.total++;
+        DATA.stats.comunas.add(comuna);
+
+        const isHomicidio = row.analisis?.violencia?.hubo_homicidio === true;
+        const isCrimenOrg = row.analisis?.es_crimen_organizado === true;
+        if (isHomicidio) DATA.stats.homicidios++;
+        if (isCrimenOrg) DATA.stats.crimen_organizado++;
+
+        // NORMALIZACIÓN DE DELITO (quitar tildes, espacios y forzar minúsculas)
+        let rawDelito = (row.analisis?.delito?.categoria_principal || 'otro').trim().toUpperCase();
+        rawDelito = rawDelito.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // "SECUESTRÓ" -> "SECUESTRO"
+        let delito = rawDelito.toLowerCase().replace(/\s+/g, '_');
+        
+        DATA.delitos[delito] = (DATA.delitos[delito] || 0) + 1;
+
+        const org = row.analisis?.organizacion_criminal?.nombre;
+        if (org && org !== 'null' && org !== 'desconocida' && org !== 'banda criminal' && org.trim() !== "") {
+            DATA.organizaciones[org] = (DATA.organizaciones[org] || 0) + 1;
+        }
+
+        const fecha = row.fecha_publicacion ? row.fecha_publicacion.substring(0,7) : null;
+        if (fecha) {
+            if (!DATA.timeline[fecha]) DATA.timeline[fecha] = { total: 0, delitos: {} };
+            DATA.timeline[fecha].total++;
+            DATA.timeline[fecha].delitos[delito] = (DATA.timeline[fecha].delitos[delito] || 0) + 1;
+            DATA.anios.add(fecha.substring(0,4));
+        }
+
+        // ── Acumuladores para Analítica ────────────────────────────────────
+        const AN = DATA.analitica;
+        const anio = (row.fecha_publicacion || '').substring(0,4);
+        if (!AN.armasPorAnio[anio])   AN.armasPorAnio[anio]   = {si:0,no:0};
+        if (!AN.homPorAnio[anio])     AN.homPorAnio[anio]     = {si:0,no:0};
+        if (!AN.menoresPorAnio[anio]) AN.menoresPorAnio[anio] = {si:0,no:0};
+
+        const vioA = row.analisis?.violencia || {};
+        if (vioA.uso_armas === true)        { AN.totalArmas++;    AN.armasPorAnio[anio].si++; }
+        if (vioA.uso_armas === false)       { AN.totalSinArmas++; AN.armasPorAnio[anio].no++; }
+        if (vioA.hubo_homicidio === true)   { AN.totalHom++;      AN.homPorAnio[anio].si++; }
+        if (vioA.hubo_homicidio === false)  { AN.totalSinHom++;   AN.homPorAnio[anio].no++; }
+        const nv = vioA.nivel; if (nv && nv!=='null') AN.violencia[nv] = (AN.violencia[nv]||0)+1;
+
+        const impA = row.analisis?.imputados || {};
+        if (impA.hay_menores === true)  { AN.totalMenoresSi++; AN.menoresPorAnio[anio].si++; }
+        if (impA.hay_menores === false) { AN.totalMenoresNo++; AN.menoresPorAnio[anio].no++; }
+        (impA.nacionalidades || []).forEach(n => {
+            if (!n || n==='null') return;
+            const nn = normNac(n);
+            AN.nacImp[nn] = (AN.nacImp[nn]||0)+1;
+            if (!['Chilena','Chileno','Chilenos'].includes(nn)) AN.totalExtranjeros++;
+        });
+
+        (row.analisis?.victimas?.nacionalidad || []).forEach(n => {
+            if (!n || n==='null') return;
+            const nn = normNac(n);
+            if (nn === 'Japonesa') return;   // excluir japonesa de víctimas
+            AN.nacVic[nn] = (AN.nacVic[nn]||0)+1;
+        });
+
+        const mer = row.analisis?.mercado_ilicito || {};
+        const mt = mer.tipo; if (mt && mt!=='null') AN.mercado[mt] = (AN.mercado[mt]||0)+1;
+        let sb = mer.sustancia_o_bien;
+        if (sb && sb!=='null' && sb!=='droga' && sb!=='drogas') {
+            sb = normSustancia(sb); AN.sustancias[sb] = (AN.sustancias[sb]||0)+1;
+        }
+
+        const ep = (row.analisis?.estado_judicial||{}).etapa;
+        if (ep && ep!=='null') AN.etapa[ep] = (AN.etapa[ep]||0)+1;
+
+        const oo = (row.analisis?.organizacion_criminal||{}).origen;
+        if (oo && oo!=='null') AN.origenOrg[oo] = (AN.origenOrg[oo]||0)+1;
+
+        const mod = (row.analisis?.delito||{}).modalidad;
+        if (mod && mod!=='null') { const m=mod.toLowerCase().trim(); AN.modalidad[m]=(AN.modalidad[m]||0)+1; }
+
+        // Extracción de Imputados y sus delitos asociados
+        const imputadosArr = row.analisis?.imputados?.nombres_imputados || [];
+        imputadosArr.forEach(imp => {
+            if (imp && imp !== 'null' && imp.trim() !== '' && esNombreReal(imp)) {
+                const impName = imp.trim();
+                if (!DATA.imputadosData[impName]) DATA.imputadosData[impName] = new Set();
+                DATA.imputadosData[impName].add(delito);
+            }
+        });
+
+        // Extracción de Delincuentes y Prontuario
+        const delincuentesArr = row.analisis?.delito?.nombre_delincuente || [];
+        delincuentesArr.forEach(del => {
+            if (del && del !== 'null' && del.trim() !== '' && esNombreReal(del)) {
+                const dName = del.trim();
+                if (!DATA.delincuentes[dName]) DATA.delincuentes[dName] = new Set();
+                DATA.delincuentes[dName].add(delito);
+            }
+        });
+
+        // Base para Tabla Noticias
+        DATA.noticias.push({
+            titulo: row.titulo, fecha: row.fecha_publicacion, fuente: row.fuente, link: row.link,
+            delito: delito, comuna: comuna, region: row.analisis?.ubicacion?.region,
+            org: org !== 'null' ? org : null, homicidio: isHomicidio, crimen_org: isCrimenOrg,
+            resumen: row.texto ? row.texto.substring(0, 180) + '...' : ''
+        });
+    });
+
+    DATA.noticias.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
+    updateUI();
+}
+
+
+// ── HELPERS NORMALIZACIÓN ─────────────────────────────────────────────────
+function normNac(n) {
+    if (!n) return 'Otra';
+    const m = {
+        // Chile
+        'chilena':'Chilena','chileno':'Chilena','chilenos':'Chilena',
+        // Venezuela — todas las variantes → Venezolana
+        'venezolana':'Venezolana','venezolano':'Venezolana','venezolanos':'Venezolana','venezolanas':'Venezolana',
+        // Colombia
+        'colombiana':'Colombiana','colombiano':'Colombiana',
+        // Bolivia
+        'boliviana':'Boliviana','boliviano':'Boliviana',
+        // Perú
+        'peruana':'Peruana','peruano':'Peruana',
+        // Extranjera — todas las variantes → Extranjera
+        'extranjera':'Extranjera','extranjero':'Extranjera','extranjeros':'Extranjera',
+        'extranjeras':'Extranjera','extranjera (no especificada)':'Extranjera',
+        // Ecuador
+        'ecuatoriana':'Ecuatoriana','ecuatoriano':'Ecuatoriana',
+        // Argentina
+        'argentina':'Argentina','argentino':'Argentina',
+        // Brasil
+        'brasileña':'Brasileña','brasileño':'Brasileña',
+        // Otros
+        'estadounidense':'Estadounidense',
+        'dominicana':'Dominicana','dominicano':'Dominicana',
+        'paraguaya':'Paraguaya','paraguayo':'Paraguaya',
+        'mexicana':'Mexicana','mexicano':'Mexicana',
+        'francesa':'Francesa','francés':'Francesa',
+        'china':'China','chino':'China',
+    };
+    return m[n.trim().toLowerCase()] || n.trim().charAt(0).toUpperCase()+n.trim().slice(1).toLowerCase();
+}
+
+function normSustancia(s) {
+    if (!s) return null;
+    const sl = s.toLowerCase().trim();
+    if (sl.includes('cocaí') || sl.includes('cocai') || sl.includes('clorhidrato')) return 'Cocaína';
+    if (sl.includes('marihuana') || sl.includes('cannabis')) return 'Marihuana/Cannabis';
+    if (sl.includes('pasta base')) return 'Pasta base';
+    if (sl.includes('ketamina')) return 'Ketamina';
+    if (sl.includes('arma')) return 'Armas de fuego';
+    if (sl.includes('cigarrill')) return 'Cigarrillos';
+    if (sl.includes('madera')) return 'Madera';
+    if (sl.includes('metanfetamina')) return 'Metanfetamina';
+    if (sl.includes('fentanilo')) return 'Fentanilo';
+    if (sl.includes('heroí') || sl.includes('heroina')) return 'Heroína';
+    if (sl.includes('cobre') || sl.includes('metal')) return 'Cobre/Metales';
+    if (sl.includes('éxtasis') || sl.includes('extasis') || sl.includes('mdma')) return 'Éxtasis/MDMA';
+    if (sl.includes('celular')) return 'Celulares';
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+// paleta de colores del tema oscuro
+const GOLD = '#c9a84c'; const RED = '#c0392b'; const TEAL = '#2dd4bf';
+const BLUE = '#38bdf8'; const GREEN = '#4ade80'; const ORANGE = '#fb923c';
+const PINK = '#f472b6'; const PURPLE = '#a78bfa'; const LIME = '#a3e635';
+
+const CHART_DEFAULTS = {
+    plugins:{ legend:{ labels:{ color:'#cfc4aa', font:{ family:"'Source Code Pro',monospace", size:10 }, boxWidth:12, padding:10 } } },
+    scales:{ x:{ ticks:{ color:'#6a6050', font:{size:9} }, grid:{ color:'#1a1610' } }, y:{ ticks:{ color:'#6a6050', font:{size:9} }, grid:{ color:'#1a1610' } } }
+};
+
+// Registro de instancias de charts para destruirlas antes de recrear
+const _charts = {};
+function mkChart(id, cfg) {
+    if (_charts[id]) _charts[id].destroy();
+    const ctx = document.getElementById(id);
+    if (!ctx) return;
+    _charts[id] = new Chart(ctx, cfg);
+}
+
+// ── FUNCIÓN PRINCIPAL DE ANALÍTICA ───────────────────────────────────────
+// ── AÑO SELECCIONADO (null = todos) ─────────────────────────────────────
+let _analiticaAnio = null;
+
+function initAnaliticaYearBar() {
+    const anios = [...DATA.anios].sort();
+    const bar   = document.getElementById('analitica-year-bar');
+    if (!bar) return;
+
+    // Botón "Todos"
+    let btns = `<button class="yr-btn yr-active" data-yr="all" onclick="setAnaliticaAnio(null, this)">Todos</button>`;
+    anios.forEach(a => {
+        btns += `<button class="yr-btn" data-yr="${a}" onclick="setAnaliticaAnio('${a}', this)">${a}</button>`;
+    });
+    bar.innerHTML = bar.innerHTML + btns;   // mantiene el label "Filtrar año"
+}
+
+function setAnaliticaAnio(anio, btn) {
+    _analiticaAnio = anio;
+    // destacar botón activo
+    document.querySelectorAll('.yr-btn').forEach(b => b.classList.remove('yr-active'));
+    if (btn) btn.classList.add('yr-active');
+    // etiqueta descriptiva
+    const lbl = document.getElementById('analitica-year-label');
+    if (lbl) lbl.textContent = anio ? `▶ Mostrando datos del año ${anio}` : '▶ Mostrando todos los años (2019 – 2026)';
+    updateAnalitica();
+}
+
+// Calcula agregados desde RAW_DATA según el año activo
+function normModalidad(m) {
+    if (!m) return null;
+    const ml = m.toLowerCase().trim();
+    if (ml.includes('disparo') || ml.includes('balacera') || ml.includes('tiroteo') || ml.includes('balazo'))
+        return 'Disparos con armas de fuego';
+    if (ml.includes('encerrona')) return 'Encerrona';
+    if (ml.includes('portonazo')) return 'Portonazo';
+    if (ml.includes('sicariato')) return 'Sicariato';
+    if (ml.includes('robo con intimidaci')) return 'Robo con intimidación';
+    if (ml.includes('turbazo')) return 'Turbazo';
+    return m.charAt(0).toUpperCase() + m.slice(1).toLowerCase();
+}
+
+function calcAN(anioFiltro) {
+    const AN = {
+        nacImp:{}, nacVic:{}, sustancias:{}, mercado:{},
+        etapa:{}, origenOrg:{}, modalidad:{}, violencia:{},
+        armasPorAnio:{}, homPorAnio:{}, menoresPorAnio:{},
+        totalArmas:0, totalSinArmas:0, totalHom:0, totalSinHom:0,
+        totalMenoresSi:0, totalMenoresNo:0, totalExtranjeros:0, total:0
+    };
+
+    RAW_DATA.forEach(row => {
+        const comuna = row.analisis?.ubicacion?.comuna;
+        if (!comuna || comuna === 'null' || comuna.trim() === '') return;
+        const fechaMes = (row.fecha_publicacion || '').substring(0,7);
+        if (fechaMes === '2026-05') return;
+        if (fechaMes && fechaMes < '2019-01') return;
+
+        const anio = (row.fecha_publicacion || '').substring(0,4);
+        if (anioFiltro && anio !== anioFiltro) return;   // ← filtro por año
+
+        AN.total++;
+
+        // inicializar buckets por año (siempre, para los gráficos de evolución)
+        if (!AN.armasPorAnio[anio])   AN.armasPorAnio[anio]   = {si:0,no:0};
+        if (!AN.homPorAnio[anio])     AN.homPorAnio[anio]     = {si:0,no:0};
+        if (!AN.menoresPorAnio[anio]) AN.menoresPorAnio[anio] = {si:0,no:0};
+
+        const vioA = row.analisis?.violencia || {};
+        if (vioA.uso_armas === true)       { AN.totalArmas++;    AN.armasPorAnio[anio].si++; }
+        if (vioA.uso_armas === false)      { AN.totalSinArmas++; AN.armasPorAnio[anio].no++; }
+        if (vioA.hubo_homicidio === true)  { AN.totalHom++;      AN.homPorAnio[anio].si++; }
+        if (vioA.hubo_homicidio === false) { AN.totalSinHom++;   AN.homPorAnio[anio].no++; }
+        const nv = vioA.nivel; if (nv && nv !== 'null') AN.violencia[nv] = (AN.violencia[nv]||0)+1;
+
+        const impA = row.analisis?.imputados || {};
+        if (impA.hay_menores === true)  { AN.totalMenoresSi++; AN.menoresPorAnio[anio].si++; }
+        if (impA.hay_menores === false) { AN.totalMenoresNo++; AN.menoresPorAnio[anio].no++; }
+        (impA.nacionalidades || []).forEach(n => {
+            if (!n || n==='null') return;
+            const nn = normNac(n);
+            AN.nacImp[nn] = (AN.nacImp[nn]||0)+1;
+            if (!['Chilena','Chileno','Chilenos'].includes(nn)) AN.totalExtranjeros++;
+        });
+
+        (row.analisis?.victimas?.nacionalidad || []).forEach(n => {
+            if (!n || n==='null') return;
+            const nn = normNac(n);
+            if (nn === 'Japonesa') return;   // excluir japonesa de víctimas
+            AN.nacVic[nn] = (AN.nacVic[nn]||0)+1;
+        });
+
+        const mer = row.analisis?.mercado_ilicito || {};
+        const mt = mer.tipo; if (mt && mt !== 'null') AN.mercado[mt] = (AN.mercado[mt]||0)+1;
+        let sb = mer.sustancia_o_bien;
+        if (sb && sb !== 'null' && sb !== 'droga' && sb !== 'drogas') {
+            sb = normSustancia(sb); AN.sustancias[sb] = (AN.sustancias[sb]||0)+1;
+        }
+
+        const ep = (row.analisis?.estado_judicial||{}).etapa;
+        if (ep && ep !== 'null') AN.etapa[ep] = (AN.etapa[ep]||0)+1;
+
+        const oo = (row.analisis?.organizacion_criminal||{}).origen;
+        if (oo && oo !== 'null') AN.origenOrg[oo] = (AN.origenOrg[oo]||0)+1;
+
+        const mod = (row.analisis?.delito||{}).modalidad;
+        if (mod && mod !== 'null') {
+            const m = normModalidad(mod);
+            if (m) AN.modalidad[m] = (AN.modalidad[m]||0)+1;
+        }
+    });
+
+    return AN;
+}
+
+function updateAnalitica() {
+    if (!RAW_DATA || RAW_DATA.length === 0) return;
+    const AN = calcAN(_analiticaAnio);
+
+    // etiqueta inicial si aún no se inicializó
+    const lbl = document.getElementById('analitica-year-label');
+    if (lbl && !lbl.textContent) {
+        lbl.textContent = '▶ Mostrando todos los años (2019 – 2026)';
+    }
+
+    // ── 1. Mercado ilícito (donut) ────────────────────────────────────────
+    const labelsMercado = {
+        'drogas':'Drogas','asalto':'Asalto','armas':'Tráfico de armas',
+        'vehiculos':'Robo vehículos','otro':'Otro','lavado_activos':'Lavado activos',
+        'contrabando':'Contrabando','celulares_recintos':'Celulares','cobre_metales':'Cobre/Metales',
+        'migrantes':'Tráfico migrantes','trata_personas':'Trata personas',
+        'productos_agropecuarios':'Productos agro','narcotráfico':'Narcotráfico',
+        'robo':'Robo','extorsion':'Extorsión'
+    };
+    const mSorted = Object.entries(AN.mercado).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    mkChart('chartMercado', {
+        type:'doughnut',
+        data:{
+            labels: mSorted.map(([k])=>labelsMercado[k]||k),
+            datasets:[{ data: mSorted.map(([,v])=>v),
+                backgroundColor:[RED,'#8b1a1a',GOLD,TEAL,BLUE,GREEN,ORANGE,PURPLE,LIME,PINK],
+                borderColor:'#100e0b', borderWidth:2 }]
+        },
+        options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ position:'right', labels:{ color:'#cfc4aa',
+                font:{family:"'Source Code Pro',monospace",size:9}, boxWidth:10, padding:7 } } }
+        }
+    });
+
+    // ── 2. Sustancias ─────────────────────────────────────────────────────
+    const sSorted = Object.entries(AN.sustancias).sort((a,b)=>b[1]-a[1]).slice(0,12);
+    const sMax = sSorted[0]?.[1] || 1;
+    const colors12 = [RED,GOLD,TEAL,BLUE,GREEN,ORANGE,PURPLE,LIME,PINK,'#60a5fa','#34d399','#f59e0b'];
+    document.getElementById('barSustancias').innerHTML = sSorted.length
+        ? sSorted.map(([label,val],i)=>`
+            <div class="pill-bar-item">
+              <div class="pill-bar-label">${label}</div>
+              <div class="pill-bar-track"><div class="pill-bar-fill"
+                style="width:${(val/sMax*100).toFixed(1)}%;background:${colors12[i%colors12.length]}"></div></div>
+              <div class="pill-bar-val">${val}</div>
+            </div>`).join('')
+        : '<div style="color:var(--text-dim);font-size:12px;padding:20px 0">Sin datos para este año</div>';
+
+    // ── 3. Nac. imputados ─────────────────────────────────────────────────
+    const niSorted = Object.entries(AN.nacImp).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    mkChart('chartNacImp', {
+        type:'bar',
+        data:{
+            labels: niSorted.map(([k])=>k),
+            datasets:[{ label:'Imputados', data: niSorted.map(([,v])=>v),
+                backgroundColor: niSorted.map(([k])=> k==='Chilena'?GOLD:RED), borderRadius:2 }]
+        },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{display:false} },
+            scales:{ x:{ ticks:{color:'#6a6050',font:{size:9}}, grid:{color:'#1a1610'} },
+                     y:{ ticks:{color:'#cfc4aa',font:{size:9,family:"'Source Code Pro',monospace"}}, grid:{color:'#1a1610'} } }
+        }
+    });
+
+    // ── 4. Nac. víctimas ──────────────────────────────────────────────────
+    const nvSorted = Object.entries(AN.nacVic).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    mkChart('chartNacVic', {
+        type:'bar',
+        data:{
+            labels: nvSorted.map(([k])=>k),
+            datasets:[{ label:'Víctimas', data: nvSorted.map(([,v])=>v),
+                backgroundColor: nvSorted.map(([k])=> k==='Chilena'?TEAL:BLUE), borderRadius:2 }]
+        },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{display:false} },
+            scales:{ x:{ ticks:{color:'#6a6050',font:{size:9}}, grid:{color:'#1a1610'} },
+                     y:{ ticks:{color:'#cfc4aa',font:{size:9,family:"'Source Code Pro',monospace"}}, grid:{color:'#1a1610'} } }
+        }
+    });
+
+    // ── 5. Armas y homicidios por año (siempre todos, con anotación del año activo) ──
+    const aniosFull = [...DATA.anios].sort();
+    const dsArmas = {
+        label:'Con armas', data: aniosFull.map(y=>DATA.analitica.armasPorAnio[y]?.si||0),
+        borderColor:RED, backgroundColor:'rgba(192,57,43,.15)', fill:true, tension:.35,
+        pointRadius: aniosFull.map(y=> y===_analiticaAnio ? 8 : 4),
+        pointBackgroundColor: aniosFull.map(y=> y===_analiticaAnio ? '#fff' : RED),
+        pointBorderColor: aniosFull.map(y=> y===_analiticaAnio ? RED : RED),
+        pointBorderWidth: aniosFull.map(y=> y===_analiticaAnio ? 3 : 1),
+    };
+    const dsHom = {
+        label:'Homicidio', data: aniosFull.map(y=>DATA.analitica.homPorAnio[y]?.si||0),
+        borderColor:GOLD, backgroundColor:'rgba(201,168,76,.10)', fill:true, tension:.35,
+        pointRadius: aniosFull.map(y=> y===_analiticaAnio ? 8 : 4),
+        pointBackgroundColor: aniosFull.map(y=> y===_analiticaAnio ? '#fff' : GOLD),
+        pointBorderColor: aniosFull.map(y=> y===_analiticaAnio ? GOLD : GOLD),
+        pointBorderWidth: aniosFull.map(y=> y===_analiticaAnio ? 3 : 1),
+    };
+    mkChart('chartArmasHom', {
+        type:'line', data:{ labels:aniosFull, datasets:[dsArmas, dsHom] },
+        options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{
+                legend:{ labels:{ color:'#cfc4aa', font:{family:"'Source Code Pro',monospace",size:9}, boxWidth:10 } },
+                annotation: _analiticaAnio ? {
+                    annotations:{ line1:{
+                        type:'line', xMin:_analiticaAnio, xMax:_analiticaAnio,
+                        borderColor:'rgba(255,255,255,.2)', borderWidth:1, borderDash:[4,4],
+                        label:{ content:_analiticaAnio, display:true, color:'#fff',
+                            font:{size:9,family:"'Source Code Pro',monospace"}, position:'start' }
+                    }}
+                } : {}
+            },
+            scales:{ x:{ ticks:{color:'#6a6050',font:{size:9}}, grid:{color:'#1a1610'} },
+                     y:{ ticks:{color:'#6a6050',font:{size:9}}, grid:{color:'#1a1610'}, beginAtZero:true } }
+        }
+    });
+
+    // ── 6. Modalidades ────────────────────────────────────────────────────
+    const modSorted = Object.entries(AN.modalidad).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    const modMax = modSorted[0]?.[1] || 1;
+    const modColors = [ORANGE,RED,GOLD,PINK,TEAL,BLUE,GREEN,PURPLE,LIME,'#60a5fa'];
+    document.getElementById('barModalidades').innerHTML = modSorted.length
+        ? modSorted.map(([label,val],i)=>`
+            <div class="pill-bar-item">
+              <div class="pill-bar-label" style="min-width:180px">${label.charAt(0).toUpperCase()+label.slice(1)}</div>
+              <div class="pill-bar-track"><div class="pill-bar-fill"
+                style="width:${(val/modMax*100).toFixed(1)}%;background:${modColors[i%modColors.length]}"></div></div>
+              <div class="pill-bar-val">${val}</div>
+            </div>`).join('')
+        : '<div style="color:var(--text-dim);font-size:12px;padding:20px 0">Sin datos para este año</div>';
+
+    // ── 7. Menores por año (siempre todos, punto marcado si hay filtro) ───
+    const dsMenoresSi = {
+        label:'Con menores', data: aniosFull.map(y=>DATA.analitica.menoresPorAnio[y]?.si||0),
+        backgroundColor: aniosFull.map(y=> y===_analiticaAnio ? '#ff6666' : RED),
+        borderRadius:2
+    };
+    const dsMenoresNo = {
+        label:'Sin menores', data: aniosFull.map(y=>DATA.analitica.menoresPorAnio[y]?.no||0),
+        backgroundColor: aniosFull.map(y=> y===_analiticaAnio ? '#444' : '#28241a'),
+        borderRadius:2
+    };
+    mkChart('chartMenores', {
+        type:'bar', data:{ labels:aniosFull, datasets:[dsMenoresSi, dsMenoresNo] },
+        options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ labels:{ color:'#cfc4aa', font:{family:"'Source Code Pro',monospace",size:8}, boxWidth:8 } } },
+            scales:{
+                x:{ stacked:true, ticks:{color:'#6a6050',font:{size:9}}, grid:{color:'#1a1610'} },
+                y:{ stacked:true, ticks:{color:'#6a6050',font:{size:9}}, grid:{color:'#1a1610'} }
+            }
+        }
+    });
+
+    // ── 8. Etapa judicial ─────────────────────────────────────────────────
+    const etiqEtapa = {
+        'en_investigacion':'En investigación','formalizacion':'Formalización',
+        'detencion':'Detención','condena':'Condena','imputacion':'Imputación',
+        'sobreseimiento':'Sobreseimiento','apelacion':'Apelación',
+        'juicio oral':'Juicio oral','absolución':'Absolución'
+    };
+    const etSorted = Object.entries(AN.etapa).sort((a,b)=>b[1]-a[1]).slice(0,7);
+    mkChart('chartEtapa', {
+        type:'doughnut',
+        data:{
+            labels: etSorted.map(([k])=>etiqEtapa[k]||k),
+            datasets:[{ data: etSorted.map(([,v])=>v),
+                backgroundColor:[BLUE,TEAL,GOLD,RED,GREEN,ORANGE,PURPLE],
+                borderColor:'#100e0b', borderWidth:2 }]
+        },
+        options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ position:'bottom', labels:{ color:'#cfc4aa',
+                font:{family:"'Source Code Pro',monospace",size:8}, boxWidth:8, padding:5 } } }
+        }
+    });
+
+    // ── 9. Origen org ─────────────────────────────────────────────────────
+    const ooSorted = Object.entries(AN.origenOrg).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    mkChart('chartOrigenOrg', {
+        type:'bar',
+        data:{
+            labels: ooSorted.map(([k])=>k),
+            datasets:[{ label:'Organizaciones', data: ooSorted.map(([,v])=>v),
+                backgroundColor: ooSorted.map(([k])=> k==='Chile'?GOLD:RED), borderRadius:2 }]
+        },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{display:false} },
+            scales:{ x:{ ticks:{color:'#6a6050',font:{size:9}}, grid:{color:'#1a1610'} },
+                     y:{ ticks:{color:'#cfc4aa',font:{size:9,family:"'Source Code Pro',monospace"}}, grid:{color:'#1a1610'} } }
+        }
+    });
+
+    // ── 10. Nivel de violencia ────────────────────────────────────────────
+    const labelVio = {'alta':'Alta','baja':'Baja','media':'Media','sin_violencia':'Sin violencia'};
+    const vioSorted = Object.entries(AN.violencia).filter(([k])=>k!=='null').sort((a,b)=>b[1]-a[1]);
+    mkChart('chartViolencia', {
+        type:'polarArea',
+        data:{
+            labels: vioSorted.map(([k])=>labelVio[k]||k),
+            datasets:[{ data: vioSorted.map(([,v])=>v),
+                backgroundColor:[RED+'cc',GOLD+'cc',ORANGE+'cc','#28241acc'],
+                borderColor:'#100e0b', borderWidth:2 }]
+        },
+        options:{ responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ position:'bottom', labels:{ color:'#cfc4aa',
+                font:{family:"'Source Code Pro',monospace",size:9}, boxWidth:10 } } },
+            scales:{ r:{ ticks:{color:'#6a6050',font:{size:8},backdropColor:'transparent'}, grid:{color:'#1a1610'} } }
+        }
+    });
+
+    // ── KPIs ──────────────────────────────────────────────────────────────
+    const total  = AN.totalArmas + AN.totalSinArmas || 1;
+    const totalH = AN.totalHom   + AN.totalSinHom   || 1;
+    const totalM = AN.totalMenoresSi + AN.totalMenoresNo || 1;
+    const pct    = (n,d) => (n/d*100).toFixed(0)+'%';
+
+    document.getElementById('kpi-armas').textContent       = pct(AN.totalArmas, total);
+    document.getElementById('kpi-homicidio').textContent   = pct(AN.totalHom, totalH);
+    document.getElementById('kpi-menores').textContent     = pct(AN.totalMenoresSi, totalM);
+    document.getElementById('kpi-extranjeros').textContent = AN.totalExtranjeros.toLocaleString();
+
+    const topNac  = Object.entries(AN.nacImp).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k}: ${v}`).join(' · ');
+    const topSust = Object.entries(AN.sustancias).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>`${k} (${v})`).join(', ');
+    document.getElementById('kpi-extra-lines').innerHTML = `
+        <div style="margin-bottom:6px">TOP NAC. IMPUTADOS: <span style="color:var(--gold)">${topNac||'–'}</span></div>
+        <div>SUSTANCIAS PRINCIPALES: <span style="color:var(--gold)">${topSust||'–'}</span></div>`;
+}
+
+function updateUI() {
+    updateStats();
+    updatePortada();
+    initMapFilters();
+    updateMap();
+    initTimelineFilter();
+    renderTimelineChart();
+    renderDonutChart();
+    initAnaliticaYearBar();
+    updateAnalitica();
+    updateOrgs();
+    updateImputados();
+    updateDelincuentes();
+    initNewsTable();
+}
+
+// ── DESCARGA DE DATOS ──────────────────────────────────────────────────────
+
+function descargarDatosPersonas() {
+    // Convertimos los Sets a Arrays para poder exportar a JSON
+    const exportData = {
+        imputados: Object.fromEntries(Object.entries(DATA.imputadosData).map(([k,v]) => [k, Array.from(v)])),
+        delincuentes: Object.fromEntries(Object.entries(DATA.delincuentes).map(([k,v]) => [k, Array.from(v)]))
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "imputados_delincuentes_chile.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// ── ACTUALIZACIONES DE UI ──────────────────────────────────────────────────
+
+function updateStats() {
+    const s = DATA.stats;
+    const orgsCount = Object.keys(DATA.organizaciones).length;
+    document.getElementById('stats-grid').innerHTML = `
+        <div class="stat-box"><span class="stat-n">${s.total.toLocaleString()}</span><div class="stat-l">Incidentes con Comuna</div></div>
+        <div class="stat-box"><span class="stat-n">${s.homicidios}</span><div class="stat-l">Con Resultado de Homicidio</div></div>
+        <div class="stat-box"><span class="stat-n">${orgsCount}</span><div class="stat-l">Organizaciones Detectadas</div></div>
+        <div class="stat-box"><span class="stat-n">${s.comunas.size}</span><div class="stat-l">Comunas Afectadas</div></div>
+    `;
+    document.getElementById('hdr-total').textContent = s.total;
+    document.getElementById('hdr-comunas').textContent = `${s.comunas.size} comunas`;
+    if(DATA.noticias.length > 0){
+        document.getElementById('ticker-text').textContent = DATA.noticias.slice(0, 15).map(n => n.titulo).join(' ⬥ ') + ' ⬥ ';
+    }
+}
+
+function updatePortada() {
+    if(DATA.noticias.length === 0) return;
+    const main = DATA.noticias[0];
+    document.getElementById('front-main').innerHTML = `
+        ${tagHtml(main.delito)}
+        <div class="f-headline">${main.titulo}</div>
+        <div class="f-byline">📍 ${main.comuna||'Chile'} &nbsp;·&nbsp; ${fmtDate(main.fecha)} &nbsp;·&nbsp; ${main.fuente}</div>
+        <div class="f-body">${main.resumen}${main.org ? `<br/><br/><strong style="color:var(--gold)">Organización Relacionada:</strong> ${main.org}` : ''}</div>
+        <div style="margin-top:14px"><a href="${main.link}" target="_blank" style="font-family:monospace;font-size:11px;color:var(--red-bright);text-decoration:underline;">Leer fuente original →</a></div>
+    `;
+    const renderSide = (list, id) => {
+        document.getElementById(id).innerHTML = list.map(n => `
+            <div class="side-story">
+                ${tagHtml(n.delito)}
+                <div class="s-title"><a href="${n.link}" target="_blank">${n.titulo}</a></div>
+                <div class="s-meta">📍 ${n.comuna||'—'} · ${fmtDate(n.fecha)}</div>
+                ${n.org ? `<div class="s-meta" style="color:var(--gold-dim);margin-top:2px">Banda: ${n.org}</div>` : ''}
+            </div>
+        `).join('');
+    };
+    renderSide(DATA.noticias.slice(1, 5), 'front-col2');
+    renderSide(DATA.noticias.slice(5, 10), 'front-col3');
+}
+
+function initMapFilters() {
+    const sortedYears = Array.from(DATA.anios).sort();
+    const slider = document.getElementById('map-year-slider');
+    slider.max = sortedYears.length;
+    slider.value = 0;
+    
+    slider.oninput = (e) => {
+        const val = parseInt(e.target.value);
+        currentMapYear = val === 0 ? "ALL" : sortedYears[val-1];
+        document.getElementById('map-year-display').textContent = val === 0 ? "TODOS LOS AÑOS" : currentMapYear;
+        updateMap();
+    };
+}
+
+let mapInternalMarkers = [];
+function updateMap() {
+    markersLayer.clearLayers();
+    mapInternalMarkers = [];
+    document.getElementById('map-legend').innerHTML = '';
+
+    const filtered = RAW_DATA.filter(row => {
+        if (!row.analisis?.ubicacion?.comuna || row.analisis?.ubicacion?.comuna === 'null') return false;
+
+        const y = row.fecha_publicacion ? row.fecha_publicacion.substring(0,4) : null;
+        return currentMapYear === "ALL" || y === currentMapYear;
+    });
+
+    const cMap = {};
+    filtered.forEach(n => {
+        const ubi = n.analisis?.ubicacion;
+        if(ubi && ubi.comuna && ubi.coordenadas?.lat && ubi.coordenadas?.lng) {
+            if(!cMap[ubi.comuna]) cMap[ubi.comuna] = {lat: ubi.coordenadas.lat, lng: ubi.coordenadas.lng, count:0, delitos:{}};
+            cMap[ubi.comuna].count++;
+            
+            // Volvemos a aplicar la normalización aquí para el mapa, por consistencia
+            let rawDelito = (n.analisis?.delito?.categoria_principal || 'otro').trim().toUpperCase();
+            rawDelito = rawDelito.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            let cat = rawDelito.toLowerCase().replace(/\s+/g, '_');
+            
+            cMap[ubi.comuna].delitos[cat] = (cMap[ubi.comuna].delitos[cat] || 0) + 1;
+        }
+    });
+
+    const entries = Object.entries(cMap);
+    if(entries.length === 0) return;
+    const maxCount = Math.max(...entries.map(([,d])=>d.count));
+    const byDelito = {};
+
+    entries.forEach(([comuna, d]) => {
+        const topDelito = Object.entries(d.delitos).sort((a,b)=>b[1]-a[1])[0][0];
+        const r = 5 + (d.count / maxCount) * 25;
+        const m = L.circleMarker([d.lat, d.lng], { radius: r, fillColor: col(topDelito), color: '#000', weight: 1.5, opacity: 1, fillOpacity: 0.8 });
+        
+        const rows = Object.entries(d.delitos).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid #28241a;padding:2px 0;">
+                <span style="color:${col(k)}">${lbl(k)}</span><strong style="color:#f0e8d0">${v}</strong>
+            </div>
+        `).join('');
+        
+        m.bindPopup(`
+            <div style="font-family:'Playfair Display',serif;min-width:210px">
+                <div style="font-size:18px;font-weight:900;color:#f0e8d0">${comuna}</div>
+                <div style="display:flex;align-items:baseline;gap:6px;margin:10px 0">
+                    <span style="font-size:30px;font-weight:900;color:#c9a84c;line-height:1">${d.count}</span>
+                    <span style="font-size:9px;color:#6a6050;font-family:monospace;letter-spacing:2px">INCIDENTES</span>
+                </div>
+                <div style="font-size:12px">${rows}</div>
+            </div>
+        `, {className: 'dp'});
+        m.addTo(markersLayer);
+
+        if(!byDelito[topDelito]) byDelito[topDelito] = [];
+        byDelito[topDelito].push(m);
+        mapInternalMarkers.push({marker: m, delito: topDelito});
+    });
+
+    const legendEl = document.getElementById('map-legend');
+    Object.keys(byDelito).sort().forEach(delito => {
+        const item = document.createElement('div');
+        item.className = 'legend-item active';
+        item.dataset.d = delito;
+        item.innerHTML = `<span class="legend-dot" style="background:${col(delito)}"></span> ${lbl(delito)} <span>(${byDelito[delito].length})</span>`;
+        item.onclick = () => {
+            const isActive = item.classList.contains('active');
+            item.classList.toggle('active', !isActive);
+            item.classList.toggle('dimmed', isActive);
+            byDelito[delito].forEach(m => {
+                if(isActive) markersLayer.removeLayer(m); else markersLayer.addLayer(m);
+            });
+        };
+        legendEl.appendChild(item);
+    });
+}
+
+function initTimelineFilter() {
+    const sel = document.getElementById('timeline-delito-select');
+    sel.innerHTML = '<option value="ALL">Todos combinados</option>';
+    Object.keys(DATA.delitos).sort().forEach(d => {
+        sel.innerHTML += `<option value="${d}">${lbl(d)}</option>`;
+    });
+}
+
+function renderTimelineChart() {
+    const filter = document.getElementById('timeline-delito-select').value;
+    const sortedMonths = Object.keys(DATA.timeline).sort();
+    
+    const mapData = sortedMonths.map(m => {
+        if (filter === "ALL") return DATA.timeline[m].total;
+        return DATA.timeline[m].delitos[filter] || 0;
+    });
+
+    if(timelineChartObj) timelineChartObj.destroy();
+    
+    timelineChartObj = new Chart(document.getElementById('timelineChart'), {
+        type: 'line',
+        data: {
+            labels: sortedMonths,
+            datasets: [{ 
+                label: filter === 'ALL' ? 'Todos los Incidentes' : lbl(filter), 
+                data: mapData, 
+                borderColor: filter === 'ALL' ? '#c9a84c' : col(filter), 
+                backgroundColor: filter === 'ALL' ? 'rgba(201,168,76,0.1)' : `${col(filter)}20`, 
+                borderWidth: 2, 
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            scales: { 
+                y: { beginAtZero: true, grid: { color: '#28241a' }, ticks: { color: '#6a6050', precision: 0 } }, 
+                x: { grid: { color: '#28241a' }, ticks: { color: '#6a6050' } } 
+            }, 
+            plugins: { legend: { display: false } } 
+        }
+    });
+}
+
+function renderDonutChart() {
+    if(donutChartObj) donutChartObj.destroy();
+    const dLabels = Object.keys(DATA.delitos).sort((a,b) => DATA.delitos[b] - DATA.delitos[a]).slice(0, 8);
+    donutChartObj = new Chart(document.getElementById('donutChart'), {
+        type: 'doughnut',
+        data: { labels: dLabels.map(lbl), datasets: [{ data: dLabels.map(l => DATA.delitos[l]), backgroundColor: dLabels.map(col), borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { color: '#cfc4aa', font: { family: 'Source Code Pro', size: 10 } } } } }
+    });
+}
+
+function updateOrgs() {
+    const max = Math.max(...Object.values(DATA.organizaciones), 1);
+    // Organizaciones a excluir por ser genéricas o incorrectas
+    const ORG_EXCLUIR = new Set([
+        'banda de narcotraficantes','narcotráfico','narcotrafico',
+        'banda delictual','banda criminal','dina','desconocida',
+        'banda','organización criminal'
+    ]);
+    // Limitar al top 16 filtrando las genéricas
+    const sorted = Object.entries(DATA.organizaciones)
+        .filter(([org]) => !ORG_EXCLUIR.has(org.toLowerCase().trim()))
+        .sort((a,b)=>b[1]-a[1]).slice(0, 16);
+    
+    document.getElementById('org-grid').innerHTML = sorted.map(([org, count]) => `
+        <div class="org-card">
+            <div class="org-name">${org}</div>
+            <div class="org-count">${count}</div>
+            <div class="org-bar"><div class="org-bar-fill" style="width:${Math.round(count/max*100)}%"></div></div>
+        </div>
+    `).join('');
+}
+
+function updateImputados() {
+    renderTablaPersonas();
+}
+
+function updateDelincuentes() {
+    renderTablaPersonas();
+}
+
+function filtrarPersonas() {
+    renderTablaPersonas();
+}
+
+function renderTablaPersonas() {
+    const q = (document.getElementById('personas-search')?.value || '').toLowerCase().trim();
+
+    const imputados = Object.entries(DATA.imputadosData)
+        .filter(([name]) => !q || name.toLowerCase().includes(q))
+        .sort((a, b) => a[0].localeCompare(b[0]));
+
+    const delincuentes = Object.entries(DATA.delincuentes)
+        .filter(([name]) => !q || name.toLowerCase().includes(q))
+        .sort((a, b) => a[0].localeCompare(b[0]));
+
+    document.getElementById('imputados-tbody').innerHTML = imputados.map(([name, crimes]) => `
+        <tr>
+            <td class="td-t" style="font-family:'Playfair Display',serif; font-size:15px; color:var(--white);">${name}</td>
+            <td>${Array.from(crimes).map(c => tagHtml(c)).join(' ')}</td>
+        </tr>
+    `).join('');
+
+    document.getElementById('delincuentes-tbody').innerHTML = delincuentes.map(([name, crimes]) => `
+        <tr>
+            <td class="td-t" style="font-family:'Playfair Display',serif; font-size:15px; color:var(--white);">${name}</td>
+            <td>${Array.from(crimes).map(c => tagHtml(c)).join(' ')}</td>
+        </tr>
+    `).join('');
+
+    const totalImp = Object.keys(DATA.imputadosData).length;
+    const totalDel = Object.keys(DATA.delincuentes).length;
+    const countEl = document.getElementById('personas-count');
+    if (countEl) {
+        if (q) {
+            countEl.textContent = `${imputados.length} imputados · ${delincuentes.length} delincuentes (filtrados)`;
+        } else {
+            countEl.textContent = `${totalImp} imputados · ${totalDel} delincuentes`;
+        }
+    }
+}
+
+// LÓGICA DE TABLA DE NOTICIAS
+let currentNewsPage = 0;
+const NEWS_PER_PAGE = 20;
+let filteredNews = [];
+
+function setupNewsPagination() {
+    document.getElementById('search-input').addEventListener('input', applyNewsFilters);
+    document.getElementById('delito-filter').addEventListener('change', applyNewsFilters);
+    document.getElementById('prev-page').addEventListener('click', () => { if(currentNewsPage > 0) { currentNewsPage--; renderNewsTable(); } });
+    document.getElementById('next-page').addEventListener('click', () => { 
+        const maxPage = Math.max(Math.ceil(filteredNews.length / NEWS_PER_PAGE) - 1, 0);
+        if(currentNewsPage < maxPage) { currentNewsPage++; renderNewsTable(); }
+    });
+}
+
+function initNewsTable() {
+    const sel = document.getElementById('delito-filter');
+    sel.innerHTML = '<option value="">Todos los delitos</option>';
+    Object.keys(DATA.delitos).sort().forEach(d => { sel.innerHTML += `<option value="${d}">${lbl(d)}</option>`; });
+    applyNewsFilters();
+}
+
+function applyNewsFilters() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    const d = document.getElementById('delito-filter').value;
+    
+    filteredNews = DATA.noticias.filter(n => {
+        const txt = `${n.titulo} ${n.comuna||''} ${n.org||''} ${n.resumen}`.toLowerCase();
+        return (!q || txt.includes(q)) && (!d || n.delito === d);
+    });
+    
+    currentNewsPage = 0;
+    renderNewsTable();
+}
+
+function renderNewsTable() {
+    const slice = filteredNews.slice(currentNewsPage * NEWS_PER_PAGE, (currentNewsPage + 1) * NEWS_PER_PAGE);
+    document.getElementById('news-tbody').innerHTML = slice.map(n => `
+        <tr>
+            <td class="td-m">${fmtDate(n.fecha)}</td>
+            <td class="td-t">
+                <a href="${n.link}" target="_blank">${n.titulo}</a>
+                ${n.homicidio ? '<span style="color:#ff4444;font-size:9px;margin-left:6px;font-family:monospace;letter-spacing:1px">● HOM</span>' : ''}
+                ${n.crimen_org ? '<span style="color:#38bdf8;font-size:9px;margin-left:4px;font-family:monospace">ORG</span>' : ''}
+            </td>
+            <td>${tagHtml(n.delito)}</td>
+            <td class="td-m">${n.comuna||'—'}</td>
+            <td class="td-m" style="color:var(--gold-dim)">${n.org||'—'}</td>
+            <td class="td-m">${n.fuente}</td>
+        </tr>
+    `).join('');
+    
+    const pages = Math.max(Math.ceil(filteredNews.length / NEWS_PER_PAGE), 1);
+    document.getElementById('page-info').textContent = `Pág ${currentNewsPage+1} / ${pages}`;
+    document.getElementById('result-count').textContent = `${filteredNews.length} resultados filtrados`;
+    document.getElementById('prev-page').disabled = currentNewsPage === 0;
+    document.getElementById('next-page').disabled = currentNewsPage >= pages - 1;
+}
+</script>
+</body>
+</html>
